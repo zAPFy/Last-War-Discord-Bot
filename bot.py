@@ -3,10 +3,16 @@ import discord
 from queue import Queue
 import random
 from player import Player
+from datetime import datetime
 from custombuffqueue import CustomBuffQueue
 from custombuffqueuetypes import CustomBuffQueueTypes
 import json
+import settings
+import logging
 
+
+# Initialize logger
+#logger = settings.logging.getLogger("bot")
 
 player_blacklist = [""]
 
@@ -72,13 +78,11 @@ buff_dict = {
 # Resolve queue name by aliases
 def get_queue(name):
     if name in buff_dict:
-        print (buff_dict[name])
         return buff_dict[name]
     else:
         print("Unable to resolve queue name '" + str(name) + "'.")
         return None
-
-
+    
 
 # Initialize custom help command
 class CustomHelpCommand(commands.HelpCommand):
@@ -123,6 +127,7 @@ def run():
 
         # Respond in channel
         await channel.send("Hi there! I'm up and running. Feed me your commands!")
+        #logger.info(f"User: {bot.user} (ID: {bot.user.id})")
 
 
     @bot.command()
@@ -162,7 +167,10 @@ def run():
             # Add to queue
             queue.put(player)
 
-            await ctx.send("Player '" + str(player_name) + "' has been added at position " + str(position) + ". I'll keep you up posted!")
+            await ctx.send("Player '" + str(player_name) + "' has been added at position " + str(position) + ".\n" +
+                           "Estimated waiting time: " + str(position * 10) + " minutes.\n" +
+                           "Estimated start time: " + str(queue.estimate_start_time(position).strftime('%Y-%m-%d %H:%M:%S')) + "\n" + 
+                           "I'll keep you up posted!")
             print("Added player '" + str(player_name) + "' to buff '" + str(buff_name) + "' at position " + str(position) + ".")
 
 
@@ -185,7 +193,6 @@ def run():
                 for key, player_name, discord_user_name in queue_list:
                     await ctx.send(queue_info)
                 
-
 
     # ADMIN-Commands, TBD: implement role-level concept and check permissions!
     @bot.command()
@@ -224,18 +231,24 @@ def run():
 
 
     @bot.command()
-    async def dm(ctx):
-        # Get user_id of author
-        user_id = ctx.author.id
-        
-        # Get user with user_id
-        user = bot.get_user(user_id)
-        
-        # Send DM
-        if user:
-            await user.send("Dies ist eine Privatnachricht!")
-        else:
-            await ctx.send("Benutzer nicht gefunden.")
+    async def pop(ctx, buff_name):
+        print("Trying to hand out buff to next candidate...")
+        queue = get_queue(buff_name)
+
+        if (queue != None):         
+            if (queue.empty() == True):
+                await ctx.send("The queue for '" + str(buff_name) + "' buff is already empty. Skipping command...")
+            else:
+                await ctx.send("The queue for '" + str(buff_name) + "' buff contains " + str(queue.qsize()) + " entries.")
+
+                player = queue.get()
+                queue.last_popped = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+                disc_user = bot.get_user(player.disc_user_id)
+                await ctx.user.send("Player '" + str(player.lw_user_name) + "' has received buff '" + str(buff) + "' for the next 10 minutes!")
+
+
+
+
 
 
     @bot.command()
@@ -244,6 +257,6 @@ def run():
         await ctx.bot.close()
 
 
-    bot.run(conf['token'])
+    bot.run(conf['token']) #, root_logger=True
 
 

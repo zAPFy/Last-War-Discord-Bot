@@ -1,6 +1,6 @@
 from queue import Queue
 from custombuffqueuetypes import CustomBuffQueueTypes
-from datetime import datetime
+from datetime import datetime, timedelta
 from player import Player
 
 class CustomBuffQueue(Queue):
@@ -12,7 +12,9 @@ class CustomBuffQueue(Queue):
         self.type=type
         self.description=None
         self.created=datetime.now().strftime('%Y-%m-%d %H:%M:%S')
+        self.last_popped=datetime.now()
         super().__init__(maxsize)
+
 
     def put(self, player:Player, block=True, timeout=None):
         """
@@ -33,7 +35,37 @@ class CustomBuffQueue(Queue):
         super().put(player, block, timeout)
 
 
-    def get_position(self, target_name:str):
+    def get_item(self, target_name: str):
+        """
+        This function returns the player instance item of specified user name in the buff queue.
+
+        Parameters:
+        target_name (string): Last War username of the player who's position needs to be known.
+
+        Returns:
+        Player: Player instance with specified name.
+        """
+        print("Trying to get queue position of player with username '" + str(target_name) + "'.")
+        is_found=False
+
+        # Create a copy of the queue to preserve its contents
+        temp_queue=Queue(maxsize=self.maxsize)
+
+        while not self.empty():
+            player=self.get()
+            temp_queue.put(player)  # Put the player back into the original queue after checking
+            if player.lw_user_name == target_name:
+                is_found=True
+                break
+        
+        # Restore the original queue
+        while not temp_queue.empty():
+            self.put(temp_queue.get())
+
+        return player
+        
+
+    def get_position(self, target_name: str):
         """
         This function returns the position of specified user name in the buff queue.
 
@@ -131,10 +163,21 @@ class CustomBuffQueue(Queue):
         while not temp_queue.empty():
             self.put(temp_queue.get())
 
-        print("Queue List:", queue_list)
-        print("Type of Queue List:", type(queue_list))
-
         return queue_list
+
+
+    def estimate_start_time(self, position: int):
+        """
+        This function calculates the estimated starting time for the nth player in the buff queue.
+
+        Returns:
+        datetime: Estimated starting time (server time + position + 3 minutes buffer).
+        """
+        waiting_time = timedelta(minutes=10 * position + 3)
+
+        start_time = self.last_popped + waiting_time
+
+        return start_time
 
 
     def __str__(self):
@@ -150,4 +193,5 @@ class CustomBuffQueue(Queue):
         return  f"Type: {self.type}, " \
                 f"Description: {self.description}, " \
                 f"Created: {self.created}, " \
-                f"Maxsize: {self.maxsize}"
+                f"Maxsize: {self.maxsize}", \
+                f"Last Time Popped: {self.last_popped}"
