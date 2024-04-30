@@ -22,11 +22,6 @@ def get_conf(file_name):
 conf = get_conf("conf/bot.json")
 
 
-
-# Define command prefix/es
-bot = commands.Bot(command_prefix=".", intents=discord.Intents.all())
-
-
 # Define queues
 firstQueue = CustomBuffQueue(CustomBuffQueueTypes.FIRST_LADY)
 strategyQueue = CustomBuffQueue(CustomBuffQueueTypes.SECRETARY_OF_STRATEGY)
@@ -36,23 +31,45 @@ scienceQueue = CustomBuffQueue(CustomBuffQueueTypes.SECRETARY_OF_SCIENCE)
 interiorQueue = CustomBuffQueue(CustomBuffQueueTypes.SECRETARY_OF_INTERIOR)
 
 
-# Define dictionnary
+# Define alias dictionnary for buffs
 buff_dict = {
+
+    # FIRST_LADY
+    'f': firstQueue,
+    'first': firstQueue,
+
+    # SECRETARY_OF_STRATEGY
+    'str': strategyQueue,
+    'strat': strategyQueue,
+    'strategy': strategyQueue,
+
+    # SECRETARY_OF_SECURITY
+    'sec': securityQueue,
+    'security': securityQueue,
+
+    # SECRETARY_OF_DEVELOPMENT
     'c': developmentQueue,
     'con': developmentQueue,
     'construction': developmentQueue,
     'd': developmentQueue,
     'dev': developmentQueue,
     'development': developmentQueue,
+
+    # SECRETARY_OF_SCIENCE
     'r': scienceQueue,
     'res': scienceQueue,
     'research': scienceQueue,
-    's': scienceQueue,
-    'science': scienceQueue
+    'sci': scienceQueue,
+    'science': scienceQueue,
+
+    # SECRETARY_OF_INTERIOR
+    'i': interiorQueue,
+    'int': interiorQueue,
+    'interior': interiorQueue
 }
 
 
-# Resolve queue name
+# Resolve queue name by aliases
 def get_queue(name):
     if name in buff_dict:
         print (buff_dict[name])
@@ -63,93 +80,7 @@ def get_queue(name):
 
 
 
-@bot.event
-async def on_ready():
-    
-    # Get channel
-    channel = bot.get_channel(conf['channel_id'])
-
-    # Respond in channel
-    await channel.send("Hi there! I'm back up and running.")
-
-
-@bot.command()
-async def hello(ctx):
-    print("Sending random hello message...")
-    await ctx.send(random.choice(welcome_messages))
-
-
-@bot.command()
-async def buff(ctx, buff_name, player_name):
-
-    print("Trying to set buff '" + str(buff_name) + "'...")
-
-    # Set queue
-    queue = get_queue(buff_name)
-
-    # Validate data
-    if (queue == None):
-        await ctx.send("The buff abbreviation'" + str(buff_name) + "' is currently not supported. Write to the devs at " + str(conf['mail_dev']) + "!")
-        return
-    
-    # Check blacklist
-    if (player_name in player_blacklist):
-        await ctx.send("Player '" + str(player_name) + "' is currently not eligable for buff. Write to the devs at " + str(conf['mail_dev']) + "!")
-        return
-
-    # Check queue
-    if (queue.full() == True):
-        await ctx.send("The queue is currently full. Try again later...")
-    else:
-        # Create player
-        player = Player(ctx, player_name)
-
-        # Add to queue
-        queue.put(player)
-        await ctx.send("Player '" + str(player_name) + "' has been added. I'll keep you up posted!")
-
-
-@bot.command()
-async def show(ctx, buff_name):
-
-    # Set queue
-    queue = get_queue(buff_name)
-
-    if (queue != None):       
-        if (queue.empty() == True):
-            await ctx.send("The queue for '" + str(buff_name) + "' buff is currently empty. Use the favor of the moment and queue up with `!buff_`!")
-        else:
-            await ctx.send(list(queue.queue))
-
-
-@bot.command()
-async def clear(ctx, buff_name):
-
-    # Set queue
-    queue = get_queue(buff_name)
-
-    if (queue != None):       
-        if (queue.empty() == True):
-            await ctx.send("The queue for '" + str(buff_name) + "' buff is already empty. Skipping command...")
-        else:
-            await ctx.send("The queue for '" + str(buff_name) + "' buff contains " + str(queue.qsize()) + " entries.")
-            queue.clear()
-            if (queue.qsize() == 0):
-                await ctx.send("The queue for '" + str(buff_name) + "' buff has been cleared.")
-            else:
-                raise Exception("Couldn't clear queue.")
-
-
-@bot.command()
-@commands.is_owner()
-async def shutdown(ctx):
-    await ctx.bot.close()
-
-
-bot.run( BOT_TOKEN )
-
-
-# Initialize custom help command (TBD)
+# Initialize custom help command
 class CustomHelpCommand(commands.HelpCommand):
 
     def __init__(self):
@@ -172,3 +103,147 @@ class CustomHelpCommand(commands.HelpCommand):
     
     async def send_command_help(self, command):
         return await super().send_command_help(command)
+
+
+def run():
+
+    # Initialize bot
+    command_prefix = conf['command_prefix']
+    intents = discord.Intents.all()
+
+    bot = commands.Bot(command_prefix=command_prefix
+                     , intents=intents
+                     , help_command=CustomHelpCommand())
+
+
+    @bot.event
+    async def on_ready():
+        # Get channel
+        channel = bot.get_channel(conf['channel_id'])
+
+        # Respond in channel
+        await channel.send("Hi there! I'm up and running. Feed me your commands!")
+
+
+    @bot.command()
+    async def hello(ctx):
+        print("Sending random hello message...")
+        await ctx.send(random.choice(welcome_messages))
+
+
+    @bot.command()
+    async def buff(ctx, buff_name, player_name):
+
+        print("Trying to queue player '" + str(player_name) + "' for buff '" + str(buff_name) + "'...")
+
+        # Set queue
+        queue = get_queue(buff_name)
+
+        # Validate data
+        if (queue == None):
+            await ctx.send("The buff abbreviation'" + str(buff_name) + "' is currently not supported. Write to the devs at " + str(conf['mail_dev']) + "!")
+            return
+        
+        # Check blacklist: TBD
+        #if (player_name in player_blacklist):
+        #    await ctx.send("Player '" + str(player_name) + "' is currently not eligable for buff. Write to the devs at " + str(conf['mail_dev']) + "!")
+        #    return
+
+        # Check queue
+        if (queue.full() == True):
+            await ctx.send("The queue is currently full. Try again later...")
+        else:
+            # Create player
+            player = Player(ctx, player_name)
+
+            # Determine queue position
+            position = queue.qsize()
+
+            # Add to queue
+            queue.put(player)
+
+            await ctx.send("Player '" + str(player_name) + "' has been added at position " + str(position) + ". I'll keep you up posted!")
+            print("Added player '" + str(player_name) + "' to buff '" + str(buff_name) + "' at position " + str(position) + ".")
+
+
+    @bot.command()
+    async def show(ctx, buff_name):
+
+        # Set queue
+        queue = get_queue(buff_name)
+
+        if (queue != None):       
+            if (queue.empty() == True):
+                await ctx.send("The queue for '" + str(buff_name) + "' buff is currently empty. Use the favor of the moment and queue up with `!buff_`!")
+            else:
+                queue_list = queue.list()
+                queue_info = ""
+
+                for entry in queue_list:
+                    queue_info += f"Position: {entry['position']}, Player: {entry['player']}, Added by: {entry['added by']}\n"
+
+                for key, player_name, discord_user_name in queue_list:
+                    await ctx.send(queue_info)
+                
+
+
+    # ADMIN-Commands, TBD: implement role-level concept and check permissions!
+    @bot.command()
+    async def clear(ctx, buff_name):
+
+        print("Trying to clear queue...")
+        queue = get_queue(buff_name)
+
+        if (queue != None):       
+            if (queue.empty() == True):
+                await ctx.send("The queue for '" + str(buff_name) + "' buff is already empty. Skipping command...")
+            else:
+                await ctx.send("The queue for '" + str(buff_name) + "' buff contains " + str(queue.qsize()) + " entries.")
+                queue.clear()
+                if (queue.qsize() == 0):
+                    await ctx.send("The queue for '" + str(buff_name) + "' buff has been cleared.")
+                else:
+                    raise Exception("Couldn't clear queue.")
+
+
+    @bot.command()
+    async def remove(ctx, buff_name, player_name):
+        print("Trying to remove player from queue...")
+        queue = get_queue(buff_name)
+
+        if (queue != None):         
+            if (queue.empty() == True):
+                await ctx.send("The queue for '" + str(buff_name) + "' buff is already empty. Skipping command...")
+            else:
+                await ctx.send("The queue for '" + str(buff_name) + "' buff contains " + str(queue.qsize()) + " entries.")
+                
+                if (queue.remove(player_name) == True):
+                    await ctx.send("The player '" + str(player_name) + "' has been removed from queue '" + str(buff_name) + "'.")
+                else:
+                    raise Exception("Couldn't remove player '" + str(player_name) + "' from queue'" + str(buff_name) + "'.")
+
+
+    @bot.command()
+    async def dm(ctx):
+        # Get user_id of author
+        user_id = ctx.author.id
+        
+        # Get user with user_id
+        user = bot.get_user(user_id)
+        
+        # Send DM
+        if user:
+            await user.send("Dies ist eine Privatnachricht!")
+        else:
+            await ctx.send("Benutzer nicht gefunden.")
+
+
+    @bot.command()
+    @commands.is_owner()
+    async def shutdown(ctx):
+        await ctx.bot.close()
+
+
+    bot.run(conf['token'])
+
+

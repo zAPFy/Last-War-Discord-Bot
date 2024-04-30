@@ -107,7 +107,8 @@ class CustomBuffQueue(Queue):
         Returns:
         list: A list of dictionaries containing information about each player.
         """
-        players_info=[]
+        queue_list=[]
+        count = 0
 
         # Create a copy of the queue to preserve its contents
         temp_queue=Queue(maxsize=self.maxsize)
@@ -115,17 +116,25 @@ class CustomBuffQueue(Queue):
         while not self.empty():
             player=self.get()
             temp_queue.put(player)  # Put the player back into the original queue after processing
+
+            print(f"Player {count + 1}: {player.lw_user_name} (Added by: {player.disc_user_id})")
+            
             player_info={
-                "username": player.lw_user_name,
-                "position": len(players_info)  # Position in the queue
+                "position": count,                  # Position in the queue
+                "player":   player.lw_user_name,
+                "added by": player.disc_user_id
             }
-            players_info.append(player_info)
+            queue_list.append(player_info)
+            count += 1
 
         # Restore the original queue
         while not temp_queue.empty():
             self.put(temp_queue.get())
 
-        return players_info
+        print("Queue List:", queue_list)
+        print("Type of Queue List:", type(queue_list))
+
+        return queue_list
 
 
     def __str__(self):
