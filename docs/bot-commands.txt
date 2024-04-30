@@ -1,0 +1,44 @@
+Starting the bot:
+python3 main.py
+
+The command prefix is: .
+
+====================
+Member Commands
+====================
+hello
+help
+buff        >> Queues a request for a single buff for a single player // Sends confirmation message (with estimated time) in channel
+show        >> Shows the full ordered list for a single buff queue
+rearrange   >> Moves a single player in a single buff queue to the last position (only for own entries!)
+(retract)   >> Retracts a single player
+
+
+====================
+Admin Commands
+====================
+clear       >> Clears (=deletes) all entries from a single queue
+remove      >> Removes a single player from a single queue // Sends direct message to discord user which added entry
+pop         >> Removes the next player in line from a single queue // Sends direct message to discord user which added entry
+shutdown    >> Shuts down the whole bot
+
+
+====================
+Buff Aliases
+====================
+TBD
+
+
+====================
+Examples
+====================
+
+Example 1: Add player 'Kommandant123456' to buff queue 'construction'
+.buff c Kommandant123456
+
+
+Example 2: Show all entries for buff queue 'construction'.
+.show c
+
+
+

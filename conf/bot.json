@@ -1,0 +1,8 @@
+{
+    "token": "",
+    "channel_id": 1234550615825453108,
+    "command_prefix": ".",
+    "mail_dev": "some.one@gmail.com",
+    "mail_support": "some.one@gmail.com",
+    "debug": true
+}

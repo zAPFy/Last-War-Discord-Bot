@@ -1,0 +1,66 @@
+
+
+====================
+Git Hub-Repo
+====================
+Public Repo URL: https://github.com/LinoSch/Last-War-Discord-Bot.git
+
+Create repo (one-time):
+1. git init
+2. ...
+
+Local setup (one-time per installation):
+1. Open GitBash or any client
+2. Change folder to desired target path
+3. Execute 'git clone https://github.com/LinoSch/Last-War-Discord-Bot.git'
+4. Execute 'git remote add origin https://github.com/LinoSch/Last-War-Discord-Bot.git'
+
+Update local installation (every time)
+1. git pull
+
+Upload changes:
+1. git status
+2. git add .
+3. git commit -am "Fixed multiple issues"
+4. git push origin main
+
+
+
+
+
+====================
+Python Virtual Environment
+====================
+Create venv (one-time per clone):
+1. Execute 'python -m venv <YOUR_PATH>\discord_bot_last-war\.venv'
+
+
+Activate venv:
+1. Execute .venv\Scripts\Activate.ps1
+   >> Hint: PowerShell Execution-Policy might not allow this. 
+      Simply execute 'Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process' and repeat above step.
+
+Install dependencies:
+1. pip install Discord.py
+
+Check dependencies:
+pip freeze --local
+pip list
+
+====================
+24/7 Discord Bot (Hosting)
+====================
+Option 1: https://pylexnodes.net/
+e.g. https://www.youtube.com/watch?v=jzA_jvE9Rzo
+e.g. https://www.youtube.com/watch?v=GAm9SBKEySM (newer)
+
+Option 2: https://sillydev.co.uk/  (Credits by AFKing)
+e.g. https://www.youtube.com/watch?v=aV1Yb1l0pxo
+
+Option 3: https://replit.com/
+e.g. https://infosecwriteups.com/running-discord-bots-24-7-for-free-with-replit-and-uptime-robot-43caebb0cb60
+
+
+Monitoring:
+uptimerobot.com
+>> https://uptimerobot.com/
