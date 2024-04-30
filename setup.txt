@@ -1,0 +1,17 @@
+# Create venv (one-time)
+python -m venv D:\_dev\Python\discord_bot_last-war\.venv
+
+
+# Enable Powershell execution policy
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope Process
+
+# Activate venv
+.venv\Scripts\Activate.ps1
+
+
+# Install discord library (one-time)
+pip install Discord.py
+
+# Check installation of library (one-time)
+pip freeze --local
+pip list
