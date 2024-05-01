@@ -139,14 +139,14 @@ def run():
     @bot.command()
     async def buff(ctx, buff_name, player_name):
 
-        print("Trying to queue player '" + str(player_name) + "' for buff '" + str(buff_name) + "'...")
+        print(f"Trying to queue player {str(player_name)} for buff {str(buff_name)}...")
 
         # Set queue
         queue = get_queue(buff_name)
 
         # Validate data
         if (queue == None):
-            await ctx.send("The buff abbreviation'" + str(buff_name) + "' is currently not supported. Write to the devs at " + str(conf['mail_dev']) + "!")
+            await ctx.send(f"The buff abbreviation {str(buff_name)} is currently not supported. Write to the devs at {str(conf['mail_dev'])}!")
             return
         
         # Check blacklist: TBD
@@ -167,11 +167,11 @@ def run():
             # Add to queue
             queue.put(player)
 
-            await ctx.send("Player '" + str(player_name) + "' has been added at position " + str(position) + ".\n" +
-                           "Estimated waiting time: " + str(position * 10) + " minutes.\n" +
-                           "Estimated start time: " + str(queue.estimate_start_time(position).strftime('%Y-%m-%d %H:%M:%S')) + "\n" + 
-                           "I'll keep you up posted!")
-            print("Added player '" + str(player_name) + "' to buff '" + str(buff_name) + "' at position " + str(position) + ".")
+            await ctx.send(f"Player {str(player_name)} has been added at position {str(position)}.\n" +
+                           f"Estimated waiting time: {str(position * 10)} minutes.\n" +
+                           f"Estimated start time: {str(queue.estimate_start_time(position).strftime('%Y-%m-%d %H:%M:%S'))}\n" + 
+                           "I'll keep you posted!")
+            print(f"Added player {str(player_name)} to buff {str(buff_name)} at position {str(position)}.")
 
 
     @bot.command()
@@ -182,7 +182,7 @@ def run():
 
         if (queue != None):       
             if (queue.empty() == True):
-                await ctx.send("The queue for '" + str(buff_name) + "' buff is currently empty. Use the favor of the moment and queue up with `!buff_`!")
+                await ctx.send(f"The queue for {str(buff_name)} buff is currently empty. Use the favor of the moment and queue up with `!buff_`!")
             else:
                 queue_list = queue.list()
                 queue_info = ""
@@ -203,12 +203,12 @@ def run():
 
         if (queue != None):       
             if (queue.empty() == True):
-                await ctx.send("The queue for '" + str(buff_name) + "' buff is already empty. Skipping command...")
+                await ctx.send(f"The queue for {str(buff_name)} buff is already empty. Skipping command...")
             else:
-                await ctx.send("The queue for '" + str(buff_name) + "' buff contains " + str(queue.qsize()) + " entries.")
+                await ctx.send(f"The queue for {str(buff_name)} buff contains {str(queue.qsize())} entries.")
                 queue.clear()
                 if (queue.qsize() == 0):
-                    await ctx.send("The queue for '" + str(buff_name) + "' buff has been cleared.")
+                    await ctx.send(f"The queue for {str(buff_name)} buff has been cleared.")
                 else:
                     raise Exception("Couldn't clear queue.")
 
@@ -220,14 +220,14 @@ def run():
 
         if (queue != None):         
             if (queue.empty() == True):
-                await ctx.send("The queue for '" + str(buff_name) + "' buff is already empty. Skipping command...")
+                await ctx.send(f"The queue for {str(buff_name)} buff is already empty. Skipping command...")
             else:
-                await ctx.send("The queue for '" + str(buff_name) + "' buff contains " + str(queue.qsize()) + " entries.")
+                await ctx.send(f"The queue for {str(buff_name)} buff contains {str(queue.qsize())} entries.")
                 
                 if (queue.remove(player_name) == True):
-                    await ctx.send("The player '" + str(player_name) + "' has been removed from queue '" + str(buff_name) + "'.")
+                    await ctx.send(f"The player {str(player_name)} has been removed from queue {str(buff_name)}.")
                 else:
-                    raise Exception("Couldn't remove player '" + str(player_name) + "' from queue'" + str(buff_name) + "'.")
+                    raise Exception(f"Couldn't remove player {str(player_name)} from queue {str(buff_name)}.")
 
 
     @bot.command()
@@ -237,14 +237,14 @@ def run():
 
         if (queue != None):         
             if (queue.empty() == True):
-                await ctx.send("The queue for '" + str(buff_name) + "' buff is already empty. Skipping command...")
+                await ctx.send(f'The queue for {str(buff_name)} buff is already empty. Skipping command...')
             else:
-                await ctx.send("The queue for '" + str(buff_name) + "' buff contains " + str(queue.qsize()) + " entries.")
+                await ctx.send(f'The queue for {str(buff_name)} buff contains {str(queue.qsize())} entries.')
 
                 player = queue.get()
                 queue.last_popped = datetime.now().strftime('%Y-%m-%d %H:%M:%S')
                 disc_user = bot.get_user(player.disc_user_id)
-                await ctx.user.send("Player '" + str(player.lw_user_name) + "' has received buff '" + str(buff) + "' for the next 10 minutes!")
+                await ctx.user.send(f'Player {str(player.lw_user_name)} has received buff {str(buff)} for the next 10 minutes!')
 
 
 
